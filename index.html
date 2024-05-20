@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Currency Converter</title>
+    <link rel="icon" href="icons\currency.svg">
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+	<style>
+		body{
+			background-image: linear-gradient(to right, #212529 , #f8f9fa);
+			font-family: "Times New Roman", Times, serif;
+			
+		}
+		#cardd{
+			background-color:  #e9ecef;
+			border-radius:3%;
+			
+		}
+		#convert{
+			background-color:#081c15;
+		}
+	</style>
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-md mx-auto bg-white rounded p-8" id="cardd">
+        <div class="flex items-center mb-4">
+            <img src="CONV.webp" alt="Icon" width="40px" height="40px" class="mr-2">
+            <h2 class="text-2xl font-bold">Currency Converter</h2>
+        </div>
+        <div class="mb-4">
+            <label class="block mb-2" for="amount">Amount</label>
+            <input type="text" id="amount" class="w-full border rounded px-3 py-2">
+        </div>
+        <div class="mb-4">
+            <label class="block mb-2" for="fromCurrency">From Currency</label>
+            <select id="fromCurrency" class="w-full border rounded px-3 py-2"></select>
+        </div>
+        <div class="mb-4">
+            <label class="block mb-2" for="toCurrency">To Currency</label>
+            <select id="toCurrency" class="w-full border rounded px-3 py-2"></select>
+        </div>
+        <button id="convert" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">Convert</button>
+        <div id="result" class="mt-4 font-bold"></div>
+    </div>
+
+    <script>
+        const apiKey = '2ef9fc2fb199b510ad359f1a';
+
+        // Fetch the latest exchange rates and populate the dropdowns
+        fetch(`https://v6.exchangerate-api.com/v6/${apiKey}/latest/USD`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.result === 'success') {
+                    const currencyDropdowns = [document.getElementById('fromCurrency'), document.getElementById('toCurrency')];
+                    const conversionRates = data.conversion_rates;
+
+                    currencyDropdowns.forEach(dropdown => {
+                        for (let currency in conversionRates) {
+                            const option = document.createElement('option');
+                            option.value = currency;
+                            option.text = currency;
+                            dropdown.add(option);
+                        }
+                    });
+                } else {
+                    document.getElementById('result').innerText = `Error fetching exchange rates: ${data['error-type']}`;
+                }
+            })
+            .catch(error => {
+                document.getElementById('result').innerText = `Error: ${error.message}`;
+            });
+
+        document.getElementById('convert').addEventListener('click', function () {
+            const amount = parseFloat(document.getElementById('amount').value);
+            const fromCurrency = document.getElementById('fromCurrency').value;
+            const toCurrency = document.getElementById('toCurrency').value;
+
+            fetch(`https://v6.exchangerate-api.com/v6/${apiKey}/latest/${fromCurrency}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.result === 'success') {
+                        const rate = data.conversion_rates[toCurrency];
+                        if (rate) {
+                            const convertedAmount = amount * rate;
+                            document.getElementById('result').innerText = `Converted Amount: ${convertedAmount.toFixed(2)} ${toCurrency}`;
+                        } else {
+                            document.getElementById('result').innerText = `Invalid currency code: ${toCurrency}`;
+                        }
+                    } else {
+                        document.getElementById('result').innerText = `Error fetching exchange rate: ${data['error-type']}`;
+                    }
+                })
+                .catch(error => {
+                    document.getElementById('result').innerText = `Error: ${error.message}`;
+                });
+        });
+    </script>
+</body>
+</html>
