@@ -12,7 +12,7 @@ Installation
 Clone the repository:
 bash
 Copy code
-git clone https://github.com/yourusername/currency-converter.git
+git clone https://github.com/HrishikeshAtole-24/currency-converter.git
 Open index.html in your web browser.
 Usage
 Enter the amount you want to convert.
